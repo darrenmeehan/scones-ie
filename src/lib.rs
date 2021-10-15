@@ -29,7 +29,10 @@ pub async fn main(req: Request, env: Env) -> Result<Response> {
     // functionality and a `RouteContext` which you can use to  and get route parameters and
     // Environment bindings like KV Stores, Durable Objects, Secrets, and Variables.
     router
-        .get("/", |_, _| Response::ok("Hello from Workers!"))
+        .get("/", |_, _ctx| {
+            let recipe = "<html><title>ScONes</title><body><h1>They're called scONes!</h1></body></html>";
+            Response::from_html(recipe)
+        })
         .post_async("/form/:field", |mut req, ctx| async move {
             if let Some(name) = ctx.param("field") {
                 let form = req.form_data().await?;
