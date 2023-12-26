@@ -39,6 +39,7 @@ RUN --mount=type=cache,target=/root/.rustup \
     --mount=type=cache,target=/root/.cargo/git \
 		--mount=type=cache,target=/app/target \
 		set -eux; \
+        rustup default stable; \
 		cargo build --release; \
 		cp target/release/scones .
 
