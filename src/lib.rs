@@ -1,4 +1,5 @@
 use axum::{response::Html, routing::get, Router};
+use tower_http::services::ServeFile;
 
 pub async fn run() {
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
@@ -17,4 +18,5 @@ pub fn app() -> Router {
     Router::new()
         .route("/", get(scone_handler))
         .route("/healthcheck", get(healthcheck_handler))
+        .route_service("/private", ServeFile::new("static/index.html"))
 }
