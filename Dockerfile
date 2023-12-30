@@ -61,6 +61,6 @@ RUN set -eux; \
 # Copy app from builder
 WORKDIR /app
 COPY --from=builder /app/scones .
-COPY static/index.html static/index.html
+COPY static /app/static
 
 CMD ["/app/scones"]
