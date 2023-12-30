@@ -854,7 +854,9 @@ name = "scones"
 version = "0.2.0"
 dependencies = [
  "axum",
+ "http 1.0.0",
  "reqwest",
+ "serde",
  "tokio",
  "tower-http",
  "tracing",
