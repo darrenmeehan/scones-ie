@@ -16,8 +16,12 @@ async fn healthcheck_handler() -> String {
     "All's good".to_string()
 }
 
-async fn authorization_handler() -> String {
-    "Auth endpoint not implemented".to_string()
+async fn authorization_handler(Query(params): Query<HashMap<String, String>>) -> String {
+    let client_html = get_profile_html(params.get("client_uri")).await;
+    // Get client info
+    // Get user info
+    // auth user by email
+    client_html
 }
 
 async fn token_handler() -> String {
