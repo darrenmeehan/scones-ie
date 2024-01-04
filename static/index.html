@@ -1,16 +1,43 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
   <title>Scones - An IndieAuth Server</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
-  <div class="h-app">
-    <img src="/logo.jpg" class="u-logo">
-    <a href="/" class="u-url p-name">Scones - An IndieAuth Server</a>
-    <p>In development IndieAuth service</p>
 
-    <a href="/login">login</a>
+  <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
+    <div class="md:flex h-app">
+      <div class="md:shrink-0">
+        <img class="u-logo w-full object-cover md:h-full md:w-48" src="/logo.jpg" alt="Absract baked scone, app logo">
+      </div>
+      <div class="p-8">
+        <div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">Scones - An IndieAuth client</div>
+        <a href="#" class="block mt-1 text-lg leading-tight font-medium text-black hover:underline">A sample client to aid development of a new IndieAuth service</a>
+        <p class="mt-2 text-slate-500">There isnt much here at the moment, if you're interested in tracking progress.</p>
+      </div>
+    </div>
   </div>
+    <a href="/login">login</a>
+
+  <figure class="bg-slate-100 rounded-xl p-8 dark:bg-slate-800">
+    <img class="w-24 h-24 rounded-full mx-auto" src="/darren.jpg" alt="Profile of Darren Meehan" width="384" height="512">
+    <div class="pt-6 space-y-4">
+      <blockquote>
+        <p class="text-lg font-medium">
+          “This is something I'm working on during some down time while I travel.”
+        </p>
+      </blockquote>
+      <figcaption class="font-medium">
+        <div cl>
+          Darren Meehan
+        </div>
+      </figcaption>
+    </div>
+  </figure>
+
 
 
 </body>
