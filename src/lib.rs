@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use axum::{extract::Query, routing::get, Json, Router};
+use axum::{extract::Query, response::Redirect, routing::get, Json, Router};
 use reqwest;
 use scraper::{Html, Selector};
 use serde::Serialize;
@@ -34,11 +34,33 @@ async fn metadata_handler() -> Json<MetaData> {
     Json(metadata)
 }
 
-pub async fn client_handler(Query(params): Query<HashMap<String, String>>) -> String {
+pub fn build_auth_request(mut auth_endpoint: String) -> String {
+    let mut params = HashMap::new();
+    params.insert("response_type", "code".to_string());
+    params.insert("client_id", "https://scones.fly.dev/".to_string());
+    params.insert("redirect_uri", "https://scones.fly.dev/client".to_string());
+    params.insert("state", "changeme".to_string());
+    params.insert("code_challenge", "123".to_string());
+    params.insert("code_challenge_method", "S256".to_string());
+
+    let mut query = String::new();
+    for (key, value) in params {
+        query.push_str(&format!("{}={}&", key, value));
+    }
+    query.pop();
+
+    auth_endpoint.push_str(&format!("?{}", query));
+    auth_endpoint
+}
+
+pub async fn client_handler(Query(params): Query<HashMap<String, String>>) -> Redirect {
     let profile_uri = params.get("me");
     let html = get_profile_html(profile_uri).await;
 
-    extract_auth_endpoint(html)
+    let auth_endpoint = extract_auth_endpoint(html);
+
+    let redirection_uri = build_auth_request(auth_endpoint);
+    Redirect::permanent(&redirection_uri)
 }
 
 pub fn extract_auth_endpoint(html: String) -> String {
