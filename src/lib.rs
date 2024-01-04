@@ -41,7 +41,7 @@ async fn metadata_handler() -> Json<MetaData> {
 pub fn build_auth_request(mut auth_endpoint: String) -> String {
     let mut params = HashMap::new();
     params.insert("response_type", "code".to_string());
-    params.insert("client_id", "https://scones.fly.dev/".to_string());
+    params.insert("client_uri", "https://scones.fly.dev/".to_string());
     params.insert("redirect_uri", "https://scones.fly.dev/client".to_string());
     params.insert("state", "changeme".to_string());
     params.insert("code_challenge", "123".to_string());
