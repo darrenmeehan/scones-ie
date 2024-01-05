@@ -107,6 +107,7 @@ pub fn app() -> Router {
         .route("/healthcheck", get(healthcheck_handler))
         .route_service("/", ServeFile::new("static/index.html"))
         .route_service("/logo.jpg", ServeFile::new("static/logo.jpg"))
+        .route_service("/darren.jpg", ServeFile::new("static/darren.jpg"))
         .route_service("/login", ServeFile::new("static/login.html"))
         .route_service("/darren", ServeFile::new("static/profile.html"))
         .route(
