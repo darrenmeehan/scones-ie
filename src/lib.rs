@@ -17,7 +17,8 @@ async fn healthcheck_handler() -> String {
 }
 
 async fn authorization_handler(Query(params): Query<HashMap<String, String>>) -> String {
-    let client_html = get_profile_html(params.get("client_uri")).await;
+    
+    let client_html = get_profile_html(params.get("client_uri").unwrap().to_string()).await;
     // Get client info
     // Get user info
     // auth user by email
@@ -38,7 +39,7 @@ async fn metadata_handler() -> Json<MetaData> {
     Json(metadata)
 }
 
-pub fn build_auth_request(mut auth_endpoint: String) -> String {
+pub fn build_auth_request(mut auth_endpoint: String, profile_uri: String) -> String {
     let mut params = HashMap::new();
     params.insert("response_type", "code".to_string());
     params.insert("client_uri", "https://scones.fly.dev/".to_string());
@@ -46,6 +47,7 @@ pub fn build_auth_request(mut auth_endpoint: String) -> String {
     params.insert("state", "changeme".to_string());
     params.insert("code_challenge", "123".to_string());
     params.insert("code_challenge_method", "S256".to_string());
+    params.insert("me", profile_uri);
 
     let mut query = String::new();
     for (key, value) in params {
@@ -58,12 +60,13 @@ pub fn build_auth_request(mut auth_endpoint: String) -> String {
 }
 
 pub async fn client_handler(Query(params): Query<HashMap<String, String>>) -> Redirect {
-    let profile_uri = params.get("me");
-    let html = get_profile_html(profile_uri).await;
+    let profile_uri = params.get("me").unwrap().to_string();
+    let profile_uri_clone = profile_uri.clone();
+    let html = get_profile_html(profile_uri_clone).await;
 
     let auth_endpoint = extract_auth_endpoint(html);
 
-    let redirection_uri = build_auth_request(auth_endpoint);
+    let redirection_uri = build_auth_request(auth_endpoint, profile_uri);
     Redirect::permanent(&redirection_uri)
 }
 
@@ -84,8 +87,8 @@ pub fn extract_auth_endpoint(html: String) -> String {
     result
 }
 
-async fn get_profile_html(profile_uri: Option<&String>) -> String {
-    let response = reqwest::get(profile_uri.unwrap()).await;
+async fn get_profile_html(profile_uri: String) -> String {
+    let response = reqwest::get(profile_uri).await;
     let html = match response {
         Ok(response) => response.text().await.unwrap(),
         Err(error) => format!("Error: {}", error),
