@@ -9,3 +9,10 @@ Add tracing
 Add tests
 Add docs
 Improve file serving
+
+
+## Dev Environment
+
+Rebuild container
+
+Log into fly.io by running 'fly auth login'
