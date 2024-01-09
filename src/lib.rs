@@ -17,7 +17,7 @@ async fn healthcheck_handler() -> String {
 }
 
 async fn authorization_handler(Query(params): Query<HashMap<String, String>>) -> Redirect {
-    let client_html = get_profile_html(params.get("client_uri").unwrap().to_string()).await;
+    let _client_html = get_profile_html(params.get("client_uri").unwrap().to_string()).await;
     // Get client info
     // Get user info
     // auth user by email
@@ -156,11 +156,10 @@ pub fn extract_auth_endpoint(html: String) -> String {
 
 async fn get_profile_html(profile_uri: String) -> String {
     let response = reqwest::get(profile_uri).await;
-    let html = match response {
+    match response {
         Ok(response) => response.text().await.unwrap(),
         Err(error) => format!("Error: {}", error),
-    };
-    html
+    }
 }
 
 #[derive(Serialize)]
