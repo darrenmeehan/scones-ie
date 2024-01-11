@@ -2,7 +2,8 @@
 
 IndieAuth Proof of concept. Handle with care...
 
-
+Add db to track allowed sites
+add scoping
 Split out client and services as little as possible
 Ad proper domain constraits
 Add tracing

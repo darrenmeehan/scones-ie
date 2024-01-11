@@ -5,6 +5,7 @@ use reqwest::{self, header};
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 use tower_http::services::ServeFile;
+use url::Url;
 
 pub async fn run() {
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
@@ -17,7 +18,8 @@ async fn healthcheck_handler() -> String {
 }
 
 async fn authorization_handler(Query(params): Query<HashMap<String, String>>) -> Redirect {
-    let _client_html = get_profile_html(params.get("client_uri").unwrap().to_string()).await;
+    let _client_html =
+        get_profile_html(Url::parse(params.get("client_uri").unwrap()).unwrap()).await;
     // Get client info
     // Get user info
     // auth user by email
@@ -127,14 +129,65 @@ pub fn build_auth_request(mut auth_endpoint: String, profile_uri: String) -> Str
 }
 
 pub async fn client_handler(Query(params): Query<HashMap<String, String>>) -> Redirect {
-    let profile_uri = params.get("me").unwrap().to_string();
-    let profile_uri_clone = profile_uri.clone();
-    let html = get_profile_html(profile_uri_clone).await;
+    let profile_uri = Url::parse(params.get("me").unwrap()).unwrap();
+    let html = get_profile_html(profile_uri.clone()).await;
 
-    let auth_endpoint = extract_auth_endpoint(html);
+    let links = extract_rel_me_links(html);
 
-    let redirection_uri = build_auth_request(auth_endpoint, profile_uri);
-    Redirect::permanent(&redirection_uri)
+    for link in links {
+        if links_back(link.clone(), profile_uri.clone()).await {
+            if link.domain() == Some("github.com") {
+                return github_oauth().await;
+            }
+        }
+    }
+    Redirect::temporary("/error")
+}
+
+pub async fn show_error() -> String {
+    let message = "Could not find suitable RelMeAuth endpoint".to_string();
+    format!("Something went wrong: {}", message)
+}
+
+pub async fn github_oauth() -> Redirect {
+    let client_id = env::var("GITHUB_CLIENT_ID").expect("Expected CLIENT_ID to be set.");
+    let uri = format!(
+        "https://github.com/login/oauth/authorize?client_id={}",
+        client_id
+    );
+    Redirect::temporary(&uri)
+}
+
+pub async fn links_back(to_check: url::Url, check_for: url::Url) -> bool {
+    let html = get_profile_html(to_check).await;
+    let links = extract_rel_me_links(html);
+    links.contains(&check_for)
+}
+
+pub fn extract_rel_me_links(html: String) -> Vec<url::Url> {
+    let fragment = Html::parse_fragment(&html);
+    let selector = Selector::parse("a").unwrap();
+
+    let mut result = Vec::new();
+
+    for element in fragment.select(&selector) {
+        if let Some(rel) = element.value().attr("rel") {
+            let rel_values: Vec<&str> = rel.split(" ").collect();
+            if rel_values.contains(&"me") {
+                let href = element.value().attr("href").unwrap_or_default();
+                let url = Url::parse(href);
+
+                match url {
+                    Ok(url) => result.push(url),
+                    Err(error) => {
+                        tracing::error!("Failed to parse URL: {}. Error: {}", href, error);
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+    result
 }
 
 pub fn extract_auth_endpoint(html: String) -> String {
@@ -154,7 +207,7 @@ pub fn extract_auth_endpoint(html: String) -> String {
     result
 }
 
-async fn get_profile_html(profile_uri: String) -> String {
+async fn get_profile_html(profile_uri: Url) -> String {
     let response = reqwest::get(profile_uri).await;
     match response {
         Ok(response) => response.text().await.unwrap(),
@@ -188,4 +241,5 @@ pub fn app() -> Router {
         .route("/callback", get(github_callback_handler))
         .route("/token", get(token_handler))
         .route("/client", get(client_handler))
+        .route("/error", get(show_error))
 }
