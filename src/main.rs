@@ -1,3 +1,5 @@
+pub mod github;
+
 use scones::run;
 
 #[tokio::main]

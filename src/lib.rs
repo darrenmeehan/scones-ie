@@ -1,11 +1,14 @@
-use std::{collections::HashMap, env};
+use std::collections::HashMap;
 
 use axum::{extract::Query, response::Redirect, routing::get, Json, Router};
-use reqwest::{self, header};
+use reqwest::{self};
 use scraper::{Html, Selector};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use tower_http::services::ServeFile;
 use url::Url;
+
+mod github;
+use crate::github::{github_authorize, github_callback_handler};
 
 pub async fn run() {
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
@@ -24,74 +27,7 @@ async fn authorization_handler(Query(params): Query<HashMap<String, String>>) ->
     // Get user info
     // auth user by email
     // client_html
-    let client_id = env::var("GITHUB_CLIENT_ID").expect("Expected CLIENT_ID to be set.");
-    let uri = format!(
-        "https://github.com/login/oauth/authorize?client_id={}",
-        client_id
-    );
-    Redirect::temporary(&uri)
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct GithubCredentials {
-    /// example: "90sd098w0e98f0w9e8g90a8ed098"
-    pub access_token: String,
-    /// example: "read:user"
-    pub scope: String,
-    /// example: "bearer"
-    pub token_type: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct GithubUser {
-    pub id: u64,
-    pub blog: String,
-}
-
-async fn github_callback_handler(Query(params): Query<HashMap<String, String>>) -> String {
-    let code = params.get("code").unwrap().to_string();
-    let client_id = env::var("GITHUB_CLIENT_ID").expect("Expected CLIENT_ID to be set.");
-    let client_secret = env::var("GITHUB_CLIENT_SECRET").expect("Missing CLIENT_SECRET!");
-
-    let client = reqwest::Client::new();
-    let params = [
-        ("client_id", client_id),
-        ("client_secret", client_secret),
-        ("code", code),
-    ];
-
-    let response = client
-        .post("https://github.com/login/oauth/access_token")
-        .timeout(std::time::Duration::from_secs(3))
-        .header(header::ACCEPT, "application/json")
-        .form(&params)
-        .send()
-        .await
-        .unwrap();
-
-    let credentials = response.json::<GithubCredentials>().await.unwrap();
-
-    let user = client
-        .get("https://api.github.com/user")
-        .timeout(std::time::Duration::from_secs(3))
-        .header(header::ACCEPT, "application/json")
-        .header(header::CONTENT_TYPE, "application/json")
-        .header(
-            header::AUTHORIZATION,
-            format!("bearer {}", credentials.access_token),
-        )
-        .header(header::USER_AGENT, "github.com/darrenmeehan/scones-ie")
-        .send()
-        .await
-        .unwrap()
-        .json::<GithubUser>()
-        .await
-        .unwrap();
-
-    match user.blog {
-        blog if blog == "https://drn.ie" => "Hello Darren, You are logged in".to_string(),
-        _ => "Logged in failed. Currently only Darren can login".to_string(),
-    }
+    github_authorize().await
 }
 
 async fn token_handler() -> String {
@@ -135,10 +71,10 @@ pub async fn client_handler(Query(params): Query<HashMap<String, String>>) -> Re
     let links = extract_rel_me_links(html);
 
     for link in links {
-        if links_back(link.clone(), profile_uri.clone()).await {
-            if link.domain() == Some("github.com") {
-                return github_oauth().await;
-            }
+        if links_back(link.clone(), profile_uri.clone()).await
+            && link.domain() == Some("github.com")
+        {
+            return github_authorize().await;
         }
     }
     Redirect::temporary("/error")
@@ -147,15 +83,6 @@ pub async fn client_handler(Query(params): Query<HashMap<String, String>>) -> Re
 pub async fn show_error() -> String {
     let message = "Could not find suitable RelMeAuth endpoint".to_string();
     format!("Something went wrong: {}", message)
-}
-
-pub async fn github_oauth() -> Redirect {
-    let client_id = env::var("GITHUB_CLIENT_ID").expect("Expected CLIENT_ID to be set.");
-    let uri = format!(
-        "https://github.com/login/oauth/authorize?client_id={}",
-        client_id
-    );
-    Redirect::temporary(&uri)
 }
 
 pub async fn links_back(to_check: url::Url, check_for: url::Url) -> bool {
@@ -172,7 +99,7 @@ pub fn extract_rel_me_links(html: String) -> Vec<url::Url> {
 
     for element in fragment.select(&selector) {
         if let Some(rel) = element.value().attr("rel") {
-            let rel_values: Vec<&str> = rel.split(" ").collect();
+            let rel_values: Vec<&str> = rel.split(' ').collect();
             if rel_values.contains(&"me") {
                 let href = element.value().attr("href").unwrap_or_default();
                 let url = Url::parse(href);
