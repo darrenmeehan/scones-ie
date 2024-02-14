@@ -8,7 +8,7 @@ use tower_http::services::ServeFile;
 use url::Url;
 
 mod github;
-use crate::github::{github_authorize, github_callback_handler};
+use crate::github::{callback_handler, github_authorize};
 
 pub async fn run() {
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
@@ -165,7 +165,7 @@ pub fn app() -> Router {
         )
         .route("/metadata", get(metadata_handler))
         .route("/auth", get(authorization_handler))
-        .route("/callback", get(github_callback_handler))
+        .route("/callback", get(callback_handler))
         .route("/token", get(token_handler))
         .route("/client", get(client_handler))
         .route("/error", get(show_error))

@@ -1,7 +1,8 @@
-use std::{collections::HashMap, env};
+pub(crate) use std::{collections::HashMap, env, result::Result};
 
 use axum::{extract::Query, response::Redirect};
 use reqwest::header;
+use reqwest::Error;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -29,30 +30,49 @@ pub async fn github_authorize() -> Redirect {
     Redirect::temporary(&uri)
 }
 
-pub async fn github_callback_handler(Query(params): Query<HashMap<String, String>>) -> String {
+pub async fn callback_handler(Query(params): Query<HashMap<String, String>>) -> Redirect {
     let code = params.get("code").unwrap().to_string();
+    let credentials = get_user_credentials(code).await;
+
+    match credentials {
+        Ok(credentials) => {
+            let user = get_user(credentials).await;
+            match user.unwrap().blog {
+                // Change to redirects
+                blog if blog == "https://drn.ie" => Redirect::temporary("/admin"),
+                _ => Redirect::temporary("error"),
+            }
+        }
+        Err(_) => Redirect::temporary("/error"),
+    }
+}
+
+pub async fn get_user_credentials(code: String) -> Result<GithubCredentials, Error> {
     let client_id = env::var("GITHUB_CLIENT_ID").expect("Expected CLIENT_ID to be set.");
     let client_secret = env::var("GITHUB_CLIENT_SECRET").expect("Missing CLIENT_SECRET!");
 
-    let client = reqwest::Client::new();
     let params = [
         ("client_id", client_id),
         ("client_secret", client_secret),
         ("code", code),
     ];
 
-    let response = client
+    let client = reqwest::Client::new();
+    client
         .post("https://github.com/login/oauth/access_token")
         .timeout(std::time::Duration::from_secs(3))
         .header(header::ACCEPT, "application/json")
         .form(&params)
         .send()
         .await
-        .unwrap();
+        .unwrap()
+        .json::<GithubCredentials>()
+        .await
+}
 
-    let credentials = response.json::<GithubCredentials>().await.unwrap();
-
-    let user = client
+async fn get_user(credentials: GithubCredentials) -> Result<GithubUser, Error> {
+    let client = reqwest::Client::new();
+    client
         .get("https://api.github.com/user")
         .timeout(std::time::Duration::from_secs(3))
         .header(header::ACCEPT, "application/json")
@@ -67,10 +87,4 @@ pub async fn github_callback_handler(Query(params): Query<HashMap<String, String
         .unwrap()
         .json::<GithubUser>()
         .await
-        .unwrap();
-    // move into lib
-    match user.blog {
-        blog if blog == "https://drn.ie" => "Hello Darren, You are logged in".to_string(),
-        _ => "Logged in failed. Currently only Darren can login".to_string(),
-    }
 }
