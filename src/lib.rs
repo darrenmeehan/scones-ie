@@ -21,7 +21,7 @@ async fn healthcheck_handler() -> String {
 }
 
 async fn authorization_handler(Query(params): Query<HashMap<String, String>>) -> Redirect {
-    let _client_html =
+    // let _client_html =
         get_profile_html(Url::parse(params.get("client_uri").unwrap()).unwrap()).await;
     // Get client info
     // Get user info
