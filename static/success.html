@@ -6,10 +6,10 @@
                 let params = new URLSearchParams(window.location.search);
                 let message = params.get('message');
                 let code = params.get('code');
-                console.lg("code: %o", code)
+                console.log("code: %o", code)
                 console.log("message: %o", message)
 
-                console.log("receiveMessage %o", "https://scones.fly.dev")
+                console.log("receiveMessage", "https://scones.fly.dev")
                 window.opener.postMessage(
                     'authorization:github:${message}:${JSON.stringify(code)}',
                     "https://scones.fly.dev"
