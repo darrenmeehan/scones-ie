@@ -1,0 +1,26 @@
+<html>
+    <body>
+        <script>
+        (function() {
+            function receiveMessage(e) {
+                let params = new URLSearchParams(window.location.search);
+                let message = params.get('message');
+                let code = params.get('code');
+                console.lg("code: %o", code)
+                console.log("message: %o", message)
+
+                console.log("receiveMessage %o", e)
+                window.opener.postMessage(
+                    'authorization:github:${message}:${JSON.stringify(code)}',
+                    e.origin
+                )
+                window.removeEventListener("message",receiveMessage,false);
+            }
+            window.addEventListener("message", receiveMessage, false)
+            console.log("Sending message: %o", "github")
+            window.opener.postMessage("authorizing:github", "*")
+        })()
+        </script>
+        <p>Login successful, redirecting</p>
+    </body>
+</html>

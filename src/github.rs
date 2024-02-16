@@ -32,13 +32,16 @@ pub async fn github_authorize() -> Redirect {
 
 pub async fn callback_handler(Query(params): Query<HashMap<String, String>>) -> Redirect {
     let code = params.get("code").unwrap().to_string();
-    let credentials = get_user_credentials(code).await;
+    let credentials = get_user_credentials(code.clone()).await;
 
     match credentials {
         Ok(credentials) => {
             let user = get_user(credentials).await;
             match user.unwrap().blog {
-                blog if blog == "https://drn.ie" => Redirect::temporary("/admin"),
+                blog if blog == "https://drn.ie" => {
+                    let message = "Authorizing";
+                    Redirect::temporary(&format!("/success?message={}&code={}", message, &code))
+                }
                 _ => Redirect::temporary("/error?reason=not-admin"),
             }
         }
