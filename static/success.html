@@ -9,10 +9,10 @@
                 console.lg("code: %o", code)
                 console.log("message: %o", message)
 
-                console.log("receiveMessage %o", e)
+                console.log("receiveMessage %o", "https://scones.fly.dev")
                 window.opener.postMessage(
                     'authorization:github:${message}:${JSON.stringify(code)}',
-                    e.origin
+                    "https://scones.fly.dev"
                 )
                 window.removeEventListener("message",receiveMessage,false);
             }
