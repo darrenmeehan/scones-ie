@@ -66,7 +66,9 @@ pub async fn get_user_credentials(code: String) -> Result<GithubCredentials, Err
         .await
         .unwrap()
         .json::<GithubCredentials>()
-        .a
+        .await
+}
+
 async fn get_user(credentials: GithubCredentials) -> Result<GithubUser, Error> {
     let client = reqwest::Client::new();
     client
