@@ -1,0 +1,5 @@
+backend:
+  name: github
+  repo: darrenmeehan/scones-ie
+  branch: main
+  base_url: https://scones.fly.dev
