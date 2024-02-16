@@ -38,12 +38,11 @@ pub async fn callback_handler(Query(params): Query<HashMap<String, String>>) -> 
         Ok(credentials) => {
             let user = get_user(credentials).await;
             match user.unwrap().blog {
-                // Change to redirects
                 blog if blog == "https://drn.ie" => Redirect::temporary("/admin"),
-                _ => Redirect::temporary("error"),
+                _ => Redirect::temporary("/error?reason=not-admin"),
             }
         }
-        Err(_) => Redirect::temporary("/error"),
+        Err(_) => Redirect::temporary("/error?reason=github-error"),
     }
 }
 
@@ -67,9 +66,7 @@ pub async fn get_user_credentials(code: String) -> Result<GithubCredentials, Err
         .await
         .unwrap()
         .json::<GithubCredentials>()
-        .await
-}
-
+        .a
 async fn get_user(credentials: GithubCredentials) -> Result<GithubUser, Error> {
     let client = reqwest::Client::new();
     client
