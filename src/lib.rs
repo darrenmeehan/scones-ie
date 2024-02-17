@@ -20,7 +20,7 @@ async fn healthcheck_handler() -> String {
     "All's good".to_string()
 }
 
-async fn authorization_handler(Query(params): Query<HashMap<String, String>>) -> Redirect {
+async fn authorization_handler(Query(_params): Query<HashMap<String, String>>) -> Redirect {
     github_authorize().await
 }
 
