@@ -1,22 +1,23 @@
 use std::collections::HashMap;
 
 use axum::{extract::Query, response::Redirect, routing::get, Json, Router};
-use diesel_migrations::{embed_migrations, EmbeddedMigrations};
+use deadpool_diesel::{Manager, Pool};
+use diesel::PgConnection;
 use reqwest::{self};
 use scraper::{Html, Selector};
 use serde::Serialize;
 use tower_http::services::ServeFile;
 use url::Url;
 
+mod database;
 mod github;
 use crate::github::{callback_handler, github_authorize};
-
-pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
+use crate::database::connect;
 
 pub async fn run() {
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
     tracing::debug!("listening on {}", listener.local_addr().unwrap());
-    axum::serve(listener, app()).await.unwrap();
+    axum::serve(listener, app(connect().await)).await.unwrap();
 }
 
 async fn healthcheck_handler() -> String {
@@ -148,7 +149,7 @@ struct MetaData {
     code_challenge_methods_supported: String,
 }
 
-pub fn app() -> Router {
+pub fn app(pool: Pool<Manager<PgConnection>>) -> Router {
     Router::new()
         .route("/healthcheck", get(healthcheck_handler))
         .route_service("/", ServeFile::new("static/index.html"))
@@ -175,4 +176,5 @@ pub fn app() -> Router {
         .route("/token", get(token_handler))
         .route("/client", get(client_handler))
         .route("/error", get(show_error))
+        .with_state(pool)
 }

@@ -13,7 +13,7 @@ FROM base AS builder
 RUN set -eux; \
 		apt update; \
 		apt install -y --no-install-recommends \
-			curl ca-certificates gcc libc6-dev pkg-config libssl-dev \
+			curl ca-certificates gcc libc6-dev pkg-config libssl-dev libpq-dev \
 			;
 
 # Install rustup
@@ -33,6 +33,7 @@ RUN set -eux; \
 # Copy sources and build them
 WORKDIR /app
 COPY src src
+COPY migrations migrations
 COPY Cargo.toml Cargo.lock ./
 RUN --mount=type=cache,target=/root/.rustup \
     --mount=type=cache,target=/root/.cargo/registry \
