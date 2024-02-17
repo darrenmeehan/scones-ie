@@ -9,7 +9,7 @@ use serde::Serialize;
 use tower_http::services::ServeFile;
 use url::Url;
 
-mod database;
+pub mod database;
 mod github;
 use crate::github::{callback_handler, github_authorize};
 use crate::database::connect;

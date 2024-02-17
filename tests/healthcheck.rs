@@ -1,4 +1,5 @@
 use scones::app;
+use scones::database::connect;
 
 #[cfg(test)]
 mod tests {
@@ -11,7 +12,7 @@ mod tests {
         let addr = listener.local_addr().unwrap();
 
         tokio::spawn(async move {
-            axum::serve(listener, app()).await.unwrap();
+            axum::serve(listener, app(connect().await)).await.unwrap();
         });
 
         let client = reqwest::Client::new();
