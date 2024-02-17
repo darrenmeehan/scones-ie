@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use axum::{routing::get, Router};
 use deadpool_diesel::{Manager, Pool};
 use diesel::PgConnection;
@@ -11,37 +9,12 @@ mod handlers;
 pub mod relme;
 use crate::database::connect;
 use crate::github::callback_handler;
-use crate::handlers::{authorization_handler, client_handler, healthcheck_handler, metadata_handler, token_handler};
+use crate::handlers::{authorization_handler, client_handler, healthcheck_handler, metadata_handler, token_handler, error_handler};
 
 pub async fn run() {
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
     tracing::debug!("listening on {}", listener.local_addr().unwrap());
     axum::serve(listener, app(connect().await)).await.unwrap();
-}
-
-pub fn build_auth_request(mut auth_endpoint: String, profile_uri: String) -> String {
-    let mut params = HashMap::new();
-    params.insert("response_type", "code".to_string());
-    params.insert("client_uri", "https://scones.fly.dev/".to_string());
-    params.insert("redirect_uri", "https://scones.fly.dev/client".to_string());
-    params.insert("state", "changeme".to_string());
-    params.insert("code_challenge", "123".to_string());
-    params.insert("code_challenge_method", "S256".to_string());
-    params.insert("me", profile_uri);
-
-    let mut query = String::new();
-    for (key, value) in params {
-        query.push_str(&format!("{}={}&", key, value));
-    }
-    query.pop();
-
-    auth_endpoint.push_str(&format!("?{}", query));
-    auth_endpoint
-}
-
-pub async fn show_error() -> String {
-    let message = "Could not find suitable RelMeAuth endpoint".to_string();
-    format!("Something went wrong: {}", message)
 }
 
 pub fn app(pool: Pool<Manager<PgConnection>>) -> Router {
@@ -70,6 +43,6 @@ pub fn app(pool: Pool<Manager<PgConnection>>) -> Router {
         .route("/callback", get(callback_handler))
         .route("/token", get(token_handler))
         .route("/client", get(client_handler))
-        .route("/error", get(show_error))
+        .route("/error", get(error_handler))
         .with_state(pool)
 }

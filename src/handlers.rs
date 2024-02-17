@@ -53,3 +53,7 @@ pub async fn client_handler(Query(params): Query<HashMap<String, String>>) -> Re
     Redirect::temporary("/error")
 }
 
+pub async fn error_handler() -> String {
+    let message = "Could not find suitable RelMeAuth endpoint".to_string();
+    format!("Something went wrong: {}", message)
+}
