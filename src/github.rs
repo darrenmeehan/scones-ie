@@ -40,7 +40,7 @@ pub async fn callback_handler(Query(params): Query<HashMap<String, String>>) -> 
             match user.unwrap().blog {
                 blog if blog == "https://drn.ie" => {
                     let message = "Authorizing";
-                    Redirect::temporary(&format!("/success?message={}&code={}", message, &code))
+                    Redirect::temporary(&format!("/success/#message={}&access_token={}&error=none&state={}", message, &code, &code))
                 }
                 _ => Redirect::temporary("/error?reason=not-admin"),
             }
