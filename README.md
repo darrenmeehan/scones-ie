@@ -17,3 +17,7 @@ Improve file serving
 Rebuild container
 
 Log into fly.io by running 'fly auth login'
+
+https://fly.io/docs/postgres/connecting/connecting-with-flyctl/
+
+https://diesel.rs/guides/getting-started

@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use axum::{extract::Query, response::Redirect, routing::get, Json, Router};
+use diesel_migrations::{embed_migrations, EmbeddedMigrations};
 use reqwest::{self};
 use scraper::{Html, Selector};
 use serde::Serialize;
@@ -9,6 +10,8 @@ use url::Url;
 
 mod github;
 use crate::github::{callback_handler, github_authorize};
+
+pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 
 pub async fn run() {
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();

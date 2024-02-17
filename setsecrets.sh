@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 fly secrets set GITHUB_CLIENT_SECRET="${SCONES_TEST_CLIENT_SECRET}"
