@@ -1,10 +1,10 @@
-use serde::Serialize;
 use crate::github::github_authorize;
-use crate::relme::{links_back, get_profile_html, extract_rel_me_links};
+use crate::relme::{extract_rel_me_links, get_profile_html, links_back};
 use axum::{extract::Query, response::Redirect, Json};
+use serde::Serialize;
 
-use url::Url;
 use std::collections::HashMap;
+use url::Url;
 
 #[derive(Serialize)]
 pub struct MetaData {

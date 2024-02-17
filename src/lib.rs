@@ -9,7 +9,10 @@ mod handlers;
 pub mod relme;
 use crate::database::connect;
 use crate::github::callback_handler;
-use crate::handlers::{authorization_handler, client_handler, healthcheck_handler, metadata_handler, token_handler, error_handler};
+use crate::handlers::{
+    authorization_handler, client_handler, error_handler, healthcheck_handler, metadata_handler,
+    token_handler,
+};
 
 pub async fn run() {
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();

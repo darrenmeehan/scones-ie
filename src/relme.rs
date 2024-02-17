@@ -1,5 +1,5 @@
-use url::Url;
 use scraper::{Html, Selector};
+use url::Url;
 
 pub fn extract_auth_endpoint(html: String) -> String {
     let fragment = Html::parse_fragment(&html);
