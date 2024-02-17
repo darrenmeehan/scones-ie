@@ -1,45 +1,22 @@
 use std::collections::HashMap;
 
-use axum::{extract::Query, response::Redirect, routing::get, Json, Router};
+use axum::{routing::get, Router};
 use deadpool_diesel::{Manager, Pool};
 use diesel::PgConnection;
-use reqwest::{self};
-use scraper::{Html, Selector};
-use serde::Serialize;
 use tower_http::services::ServeFile;
-use url::Url;
 
 pub mod database;
 mod github;
+mod handlers;
+pub mod relme;
 use crate::database::connect;
-use crate::github::{callback_handler, github_authorize};
+use crate::github::callback_handler;
+use crate::handlers::{authorization_handler, client_handler, healthcheck_handler, metadata_handler, token_handler};
 
 pub async fn run() {
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
     tracing::debug!("listening on {}", listener.local_addr().unwrap());
     axum::serve(listener, app(connect().await)).await.unwrap();
-}
-
-async fn healthcheck_handler() -> String {
-    "All's good".to_string()
-}
-
-async fn authorization_handler(Query(_params): Query<HashMap<String, String>>) -> Redirect {
-    github_authorize().await
-}
-
-async fn token_handler() -> String {
-    "Token endpoint not implemented".to_string()
-}
-
-async fn metadata_handler() -> Json<MetaData> {
-    let metadata = MetaData {
-        issuer: "https://scones.fly.dev".to_string(),
-        authorization_endpoint: "https://scones.fly.dev/auth".to_string(),
-        token_endpoint: "https://scones.fly.dev/token".to_string(),
-        code_challenge_methods_supported: "".to_string(),
-    };
-    Json(metadata)
 }
 
 pub fn build_auth_request(mut auth_endpoint: String, profile_uri: String) -> String {
@@ -62,91 +39,9 @@ pub fn build_auth_request(mut auth_endpoint: String, profile_uri: String) -> Str
     auth_endpoint
 }
 
-pub async fn client_handler(Query(params): Query<HashMap<String, String>>) -> Redirect {
-    let profile_uri = Url::parse(params.get("me").unwrap()).unwrap();
-    let html = get_profile_html(profile_uri.clone()).await;
-
-    let links = extract_rel_me_links(html);
-
-    for link in links {
-        if links_back(link.clone(), profile_uri.clone()).await
-            && link.domain() == Some("github.com")
-        {
-            return github_authorize().await;
-        }
-    }
-    Redirect::temporary("/error")
-}
-
 pub async fn show_error() -> String {
     let message = "Could not find suitable RelMeAuth endpoint".to_string();
     format!("Something went wrong: {}", message)
-}
-
-pub async fn links_back(to_check: url::Url, check_for: url::Url) -> bool {
-    let html = get_profile_html(to_check).await;
-    let links = extract_rel_me_links(html);
-    links.contains(&check_for)
-}
-
-pub fn extract_rel_me_links(html: String) -> Vec<url::Url> {
-    let fragment = Html::parse_fragment(&html);
-    let selector = Selector::parse("a").unwrap();
-
-    let mut result = Vec::new();
-
-    for element in fragment.select(&selector) {
-        if let Some(rel) = element.value().attr("rel") {
-            let rel_values: Vec<&str> = rel.split(' ').collect();
-            if rel_values.contains(&"me") {
-                let href = element.value().attr("href").unwrap_or_default();
-                let url = Url::parse(href);
-
-                match url {
-                    Ok(url) => result.push(url),
-                    Err(error) => {
-                        tracing::error!("Failed to parse URL: {}. Error: {}", href, error);
-                        continue;
-                    }
-                }
-            }
-        }
-    }
-    result
-}
-
-pub fn extract_auth_endpoint(html: String) -> String {
-    let fragment = Html::parse_fragment(&html);
-    let selector = Selector::parse("link").unwrap();
-
-    let mut result = String::new();
-
-    for element in fragment.select(&selector) {
-        if let Some(rel) = element.value().attr("rel") {
-            if rel == "authorization_endpoint" {
-                let auth_endpoint = element.value().attr("href").unwrap_or_default();
-                result.push_str(auth_endpoint);
-            }
-        }
-    }
-    result
-}
-
-async fn get_profile_html(profile_uri: Url) -> String {
-    let response = reqwest::get(profile_uri).await;
-    match response {
-        Ok(response) => response.text().await.unwrap(),
-        Err(error) => format!("Error: {}", error),
-    }
-}
-
-#[derive(Serialize)]
-struct MetaData {
-    issuer: String,
-    authorization_endpoint: String,
-    token_endpoint: String,
-    // list of supported methods
-    code_challenge_methods_supported: String,
 }
 
 pub fn app(pool: Pool<Manager<PgConnection>>) -> Router {

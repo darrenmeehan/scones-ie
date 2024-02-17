@@ -1,4 +1,4 @@
-use scones::{extract_auth_endpoint, extract_rel_me_links};
+use scones::relme::{extract_auth_endpoint, extract_rel_me_links};
 
 #[cfg(test)]
 mod tests {
