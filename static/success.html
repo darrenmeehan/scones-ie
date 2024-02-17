@@ -11,7 +11,7 @@
 
                 console.log("receiveMessage", "https://scones.fly.dev")
                 window.opener.postMessage(
-                    'authorization:github:${message}:${JSON.stringify(code)}',
+                    'authorization:github:${message}:${code}',
                     "https://scones.fly.dev"
                 )
                 window.removeEventListener("message",receiveMessage,false);
