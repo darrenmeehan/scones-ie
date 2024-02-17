@@ -11,8 +11,8 @@ use url::Url;
 
 pub mod database;
 mod github;
-use crate::github::{callback_handler, github_authorize};
 use crate::database::connect;
+use crate::github::{callback_handler, github_authorize};
 
 pub async fn run() {
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
