@@ -6,6 +6,7 @@ use tower_http::services::ServeFile;
 pub mod database;
 mod github;
 mod handlers;
+mod configuration;
 pub mod relme;
 use crate::database::connect;
 use crate::github::callback_handler;
@@ -13,9 +14,12 @@ use crate::handlers::{
     authorization_handler, client_handler, error_handler, healthcheck_handler, metadata_handler,
     token_handler,
 };
+use crate::configuration::get_configuration;
 
 pub async fn run() {
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
+    let configuration = get_configuration().expect("Failed to read configuration.");
+    let address = format!("0.0.0.0:{}", configuration.application_port);
+    let listener = tokio::net::TcpListener::bind(address).await.unwrap();
     tracing::debug!("listening on {}", listener.local_addr().unwrap());
     axum::serve(listener, app(connect().await)).await.unwrap();
 }

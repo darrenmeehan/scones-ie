@@ -1,7 +1,8 @@
 {
-    "build": {
-        "dockerfile": "Dockerfile"
-    },
+	"name": "Rust web app environment",
+    "dockerComposeFile": ["docker-compose.yaml"],
+	"service": "app",
+	"workspaceFolder": "/workspace",
     // Configure tool-specific properties.
 	"customizations": {
 		// Configure properties specific to VS Code.

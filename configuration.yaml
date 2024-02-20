@@ -1,0 +1,8 @@
+application_port: 8080
+database:
+  host: "database"
+  port: 5432
+  username: "postgres"
+  password: "password"
+  database_name: "scones"
+
