@@ -13,7 +13,7 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    container: rustlang/rust:nightly-bookworm-slim
+    container: rustlang/rust:nightly-bookworm
     services:
       # Label used to access the service container
       database:
