@@ -3,18 +3,20 @@ use deadpool_diesel::{Manager, Pool};
 use diesel::PgConnection;
 use tower_http::services::ServeFile;
 
+mod configuration;
 pub mod database;
 mod github;
 mod handlers;
-mod configuration;
+pub mod models;
+pub mod schema;
 pub mod relme;
+use crate::configuration::get_configuration;
 use crate::database::connect;
 use crate::github::callback_handler;
 use crate::handlers::{
     authorization_handler, client_handler, error_handler, healthcheck_handler, metadata_handler,
     token_handler,
 };
-use crate::configuration::get_configuration;
 
 pub async fn run() {
     let configuration = get_configuration().expect("Failed to read configuration.");
