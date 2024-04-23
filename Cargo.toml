@@ -9,16 +9,21 @@ path = "src/lib.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-axum = "0.7.4"
-http = "1.0.0"
+axum = "0.7.5"
+http = "1.1.0"
 tokio = { version = "1.36", features = ["full"] }
 tower-http = { version = "0.5.0", features = ["fs"] }
 tracing = "0.1.40"
-serde = { version = "1.0.197", features = ["derive"]}
+serde = { version = "1.0.198", features = ["derive"]}
 serde_json = "1.0"
 html_parser = "0.7.0"
+
 reqwest = { version = "0.11.24", features = ["json"] }
 scraper = "0.19"
+
+
+
+
 url = "2.2.2"
 deadpool-diesel = { version = "0.5.0", features = ["postgres"] }
 diesel = { version = "2", features = ["postgres"] }
