@@ -5,7 +5,7 @@ diesel::table! {
         id -> Int4,
         #[sql_name = "type"]
         #[max_length = 255]
-        type_ -> Varchar,
+        client_type -> Varchar,
         #[max_length = 255]
         client_id -> Varchar,
         #[max_length = 255]

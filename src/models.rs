@@ -4,13 +4,12 @@ use diesel::prelude::*;
 #[diesel(table_name = crate::schema::clients)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Client {
+    #[allow(dead_code)]
     id: i32,
     pub client_id: String,
     pub client_type: String,
     pub name: String,
     pub description: String,
-    pub email: bool,
+    pub email: String,
     pub website: String,
-    // FIXME This should be a uri
-    pub redirect_uri: uri::Uri,
 }
