@@ -25,7 +25,7 @@ scraper = "0.19"
 
 
 url = "2.2.2"
-deadpool-diesel = { version = "0.5.0", features = ["postgres"] }
+deadpool-diesel = { version = "0.6.1", features = ["postgres"] }
 diesel = { version = "2", features = ["postgres"] }
 diesel_migrations = "2"
 config = "0.14.0"
