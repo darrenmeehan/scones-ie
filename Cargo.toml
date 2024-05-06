@@ -14,7 +14,7 @@ http = "1.1.0"
 tokio = { version = "1.36", features = ["full"] }
 tower-http = { version = "0.5.2", features = ["fs"] }
 tracing = "0.1.40"
-serde = { version = "1.0.198", features = ["derive"]}
+serde = { version = "1.0.200", features = ["derive"]}
 serde_json = "1.0"
 html_parser = "0.7.0"
 
