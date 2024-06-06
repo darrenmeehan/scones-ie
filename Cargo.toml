@@ -18,7 +18,7 @@ serde = { version = "1.0.198", features = ["derive"]}
 serde_json = "1.0"
 html_parser = "0.7.0"
 
-reqwest = { version = "0.11.24", features = ["json"] }
+reqwest = { version = "0.11.24", default-features = false, features = ["json", "rustls-tls"] }
 scraper = "0.19"
 
 
@@ -29,5 +29,6 @@ deadpool-diesel = { version = "0.5.0", features = ["postgres"] }
 diesel = { version = "2", features = ["postgres"] }
 diesel_migrations = "2"
 config = "0.14.0"
+rustls = "0.23.9"
 
 [dev-dependencies]
