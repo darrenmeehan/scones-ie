@@ -37,7 +37,7 @@ services:
     
   # You can include other services not opened by VS Code as well
   database:
-    image: postgres:latest
+    image: docker.io/postgres:latest
     hostname: database
     restart: unless-stopped
     environment:
