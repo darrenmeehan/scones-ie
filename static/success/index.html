@@ -9,10 +9,10 @@
                 console.log("code: %o", code)
                 console.log("message: %o", message)
 
-                console.log("receiveMessage", "https://scones.fly.dev")
+                console.log("receiveMessage", "https://gym-scones.fly.dev")
                 window.opener.postMessage(
                     'authorization:github:${message}:${code}',
-                    "https://scones.fly.dev"
+                    "https://gym-scones.fly.dev"
                 )
                 window.removeEventListener("message",receiveMessage,false);
             }

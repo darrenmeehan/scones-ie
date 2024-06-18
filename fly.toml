@@ -3,8 +3,8 @@
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "scones"
-primary_region = "sin"
+app = "gym-scones"
+primary_region = "mad"
 
 [build]
   dockerfile = "Dockerfile"

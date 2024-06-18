@@ -12,6 +12,10 @@ pub mod schema;
 use crate::configuration::get_configuration;
 use crate::database::connect;
 
+use crate::handlers::{healthcheck_handler, authorization_handler, error_handler};
+
+use crate::github::{callback_handler};
+
 pub async fn run() {
     let configuration = get_configuration().expect("Failed to read configuration.");
     let address = format!("0.0.0.0:{}", configuration.application_port);

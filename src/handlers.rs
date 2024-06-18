@@ -13,10 +13,6 @@ pub async fn authorization_handler(Query(_params): Query<HashMap<String, String>
     github_authorize().await
 }
 
-pub async fn token_handler() -> String {
-    "Token endpoint not implemented".to_string()
-}
-
 pub async fn error_handler() -> String {
     let message = "Internal Server Error".to_string();
     format!("Something went wrong: {}", message)

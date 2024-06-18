@@ -2,7 +2,7 @@ backend:
   name: github
   repo: darrenmeehan/scones-ie
   branch: main
-  base_url: https://scones.fly.dev
+  base_url: https://gym-scones.fly.dev
 
 media_folder: "images/uploads"
 collections:
