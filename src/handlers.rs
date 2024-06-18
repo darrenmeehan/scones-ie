@@ -1,9 +1,7 @@
 use crate::github::github_authorize;
-use axum::{extract::Query, response::Redirect, Json};
-use serde::Serialize;
+use axum::{extract::Query, response::Redirect};
 
 use std::collections::HashMap;
-use url::Url;
 
 pub async fn healthcheck_handler() -> String {
     "All's good".to_string()
