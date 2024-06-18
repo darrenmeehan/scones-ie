@@ -54,6 +54,7 @@ RUN set -eux; \
 		apt update; \
 		apt install -y --no-install-recommends \
 			ca-certificates \
+			libpq-dev libpq5 \
 			; \
 		apt clean autoclean; \
 		apt autoremove --yes; \
