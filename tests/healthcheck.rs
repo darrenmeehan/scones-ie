@@ -12,7 +12,7 @@ mod tests {
         let addr = listener.local_addr().unwrap();
 
         tokio::spawn(async move {
-            axum::serve(listener, app(connect().await)).await.unwrap();
+            axum::serve(listener, app().await.unwrap()).await.unwrap();
         });
 
         let client = reqwest::Client::new();

@@ -10,7 +10,6 @@ mod handlers;
 pub mod models;
 pub mod schema;
 use crate::configuration::get_configuration;
-use crate::database::connect;
 
 use crate::handlers::{healthcheck_handler, authorization_handler, error_handler};
 
@@ -21,15 +20,14 @@ pub async fn run() {
     let address = format!("0.0.0.0:{}", configuration.application_port);
     let listener = tokio::net::TcpListener::bind(address).await.unwrap();
     tracing::debug!("listening on {}", listener.local_addr().unwrap());
-    axum::serve(listener, app(connect().await)).await.unwrap();
+    axum::serve(listener, app()).await.unwrap();
 }
 
-pub fn app(pool: Pool<Manager<PgConnection>>) -> Router {
+pub fn app() -> Router {
     Router::new()
         .route("/healthcheck", get(healthcheck_handler))
         .nest_service("/", ServeDir::new("static"))
         .route("/api/auth", get(authorization_handler))
         .route("/api/callback", get(callback_handler))
         .route("/api/error", get(error_handler))
-        .with_state(pool)
 }

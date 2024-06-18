@@ -64,5 +64,6 @@ RUN set -eux; \
 WORKDIR /app
 COPY --from=builder /app/scones .
 COPY static /app/static
+COPY configuration.yaml /app/configuration.yaml
 
 CMD ["/app/scones"]
