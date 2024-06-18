@@ -1,6 +1,4 @@
 use axum::{routing::get, Router};
-use deadpool_diesel::{Manager, Pool};
-use diesel::PgConnection;
 use tower_http::services::ServeDir;
 
 mod configuration;
