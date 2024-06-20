@@ -21,3 +21,9 @@ primary_region = "mad"
   cpu_kind = "shared"
   cpus = 1
   memory_mb = 1024
+
+
+[deploy]
+# As this is only in development, I'm saving myself time
+# NOT for production use cases
+strategy = "immediate"
