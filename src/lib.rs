@@ -1,4 +1,4 @@
-use axum::{routing::get, Router};
+use axum::{routing::get, routing::post, Router};
 use tower_http::services::ServeDir;
 
 mod configuration;
@@ -9,9 +9,9 @@ pub mod models;
 pub mod schema;
 use crate::configuration::get_configuration;
 
-use crate::handlers::{healthcheck_handler, authorization_handler, error_handler};
+use crate::handlers::{authorization_handler, error_handler, healthcheck_handler, upload_handler};
 
-use crate::github::{callback_handler};
+use crate::github::callback_handler;
 
 pub async fn run() {
     let configuration = get_configuration().expect("Failed to read configuration.");
@@ -25,6 +25,7 @@ pub fn app() -> Router {
     Router::new()
         .route("/healthcheck", get(healthcheck_handler))
         .nest_service("/", ServeDir::new("static"))
+        .route("/upload", post(upload_handler))
         .route("/api/auth", get(authorization_handler))
         .route("/api/callback", get(callback_handler))
         .route("/api/error", get(error_handler))

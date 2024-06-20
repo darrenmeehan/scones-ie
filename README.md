@@ -27,3 +27,8 @@ https://diesel.rs/guides/getting-started
 Build admin console for the site
 handle auth of admin
 management of new clients
+
+
+## References
+
+https://blog.hiibolt.com/rust/axum/tokio/server/2024/01/10/MultipartRustServer.html
