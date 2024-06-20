@@ -1,5 +1,6 @@
 use axum::{routing::get, routing::post, Router};
 use tower_http::services::ServeDir;
+use tracing::{event, Level};
 
 mod configuration;
 pub mod database;
@@ -17,7 +18,11 @@ pub async fn run() {
     let configuration = get_configuration().expect("Failed to read configuration.");
     let address = format!("0.0.0.0:{}", configuration.application_port);
     let listener = tokio::net::TcpListener::bind(address).await.unwrap();
-    tracing::debug!("listening on {}", listener.local_addr().unwrap());
+    event!(
+        Level::INFO,
+        "listening on {}",
+        listener.local_addr().unwrap()
+    );
     axum::serve(listener, app()).await.unwrap();
 }
 

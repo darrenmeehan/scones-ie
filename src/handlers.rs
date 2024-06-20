@@ -1,6 +1,7 @@
 use crate::github::github_authorize;
 use axum::extract::Multipart;
 use axum::{extract::Query, response::Redirect};
+use tracing::{event, Level};
 
 use std::collections::HashMap;
 use std::{fs::File, io::Write};
@@ -27,13 +28,13 @@ pub async fn upload_handler(mut multipart: Multipart) {
         if field.name().unwrap() != "fileupload" {
             continue;
         }
-        println!("Got file!");
+        event!(Level::INFO, "Got file!");
 
         // Grab the name
-        let file_name = field.file_name().unwrap();
+        let file_path = field.file_name().unwrap().to_string();
 
         // Create a path for the soon-to-be file
-        let file_path = format!("{}", file_name);
+        // let file_path = format!("{}", file_name);
 
         // Unwrap the incoming bytes
         let data = field.bytes().await.unwrap();
@@ -44,6 +45,6 @@ pub async fn upload_handler(mut multipart: Multipart) {
         // Write the incoming data to the handle
         file_handle.write_all(&data).expect("Failed to write data!");
 
-        println!("Successfull wrote to file")
+        event!(Level::INFO, "Successfull wrote to file")
     }
 }
